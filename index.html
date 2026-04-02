@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>3TV – La télévision interactive du Burkina</title>
+    <meta name="theme-color" content="#1D4E89">
+    <meta name="author" content="KONSÉGUÉ RÉLWENDÉ CHRISTIAN">
+    <meta name="creator" content="KONSÉGUÉ RÉLWENDÉ CHRISTIAN">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* ========== NOVEAU LOGO 3TV (Style 3D) ========== */
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-right: 40px; /* Espace pour le 'tv' */
+        }
+
+        /* Empilement des plaques pour le chiffre 3 */
+        .plates-container {
+            position: relative;
+            width: 80px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Style de base des plaques rounded square */
+        .plate {
+            position: absolute;
+            border-radius: 16px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2); /* Soft shadow 3D */
+            transition: 0.3s ease;
+        }
+
+        /* Plaque Jaune d'or (Arrière-plan) */
+        .plate.yellow {
+            background: #FBC02D;
+            width: 70px;
+            height: 80px;
+            left: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        /* Plaque Rouge vif (Milieu) */
+        .plate.red {
+            background: #D32F2F;
+            width: 70px;
+            height: 80px;
+            left: 10px;
+            bottom: 5px;
+            z-index: 2;
+        }
+
+        /* Plaque Bleu (Premier plan) - Contient le '3' */
+        .plate.blue {
+            background: linear-gradient(135deg, #1D4E89, #2a6dad); /* Texture brillante */
+            width: 80px;
+            height: 90px;
+            left: 20px;
+            top: 0;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Chiffre 3 blanc gras */
+        .logo-3 {
+            font-size: 64px;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.15); /* Soft shadow */
+        }
+
+        /* Lettres 'tv' en typographie 3D bleue */
+        .logo-tv-text {
+            font-size: 52px;
+            font-weight: 800;
+            color: #1D4E89; /* Thick blue typography */
+            margin-left: 25px; /* Inclinaison vers la droite */
+            margin-top: 15px; /* Alignement visuel */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.15); /* Soft shadow */
+        }
+
+        /* Slogan mis à jour */
+        .slogan {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: sans-serif; /* Clean sans-serif */
+        }
+
+        .slogan-main {
+            color: #424242; /* Clean dark grey */
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .slogan-interactive {
+            color: #8B1A1A; /* Dark red */
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+
+        /* Fin du nouveau logo styles. Rest of original CSS. */
+
+        .video-wrapper {
+            background: black;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 12px 0 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            min-height: 200px;
+            background: black;
+        }
+
+        .reactions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .reaction-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .reaction-btn:active {
+            transform: scale(0.96);
+        }
+
+        .horizontal-section {
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .horizontal-title {
+            color: #1D4E89;
+            margin-bottom: 12px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .marquee-container {
+            overflow-x: hidden;
+            position: relative;
+            width: 100%;
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 15px;
+            animation: scroll 20s linear infinite;
+            width: max-content;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .emission-card, .pub-card {
+            flex: 0 0 140px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+            border-left: 4px solid #D32F2F;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .emission-card:hover, .pub-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .emission-card img, .pub-card img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #ddd;
+        }
+
+        .emission-card h4, .pub-card h4 {
+            margin: 8px 0 4px;
+            font-size: 13px;
+            color: #1D4E89;
+            font-weight: bold;
+        }
+
+        .emission-card p, .pub-card p {
+            font-size: 11px;
+            color: #D32F2F;
+            font-weight: bold;
+        }
+
+        .small-btn {
+            background: #D32F2F;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 6px;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .small-btn:active {
+            background: #8B1A1A;
+        }
+
+        .search input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 40px;
+            border: 1px solid #e0e0e0;
+            background: #fafafa;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search input:focus {
+            border-color: #1D4E89;
+            box-shadow: 0 0 0 2px rgba(29,78,137,0.2);
+        }
+
+        .reception-info {
+            background: linear-gradient(135deg, #f5f7fa, #e9ecef);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 13px;
+            border-left: 5px solid #FBC02D;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="logo-section">
+            <div class="logo-main-container">
+                <div class="plates-container">
+                    <div class="plate yellow"></div> <div class="plate red"></div> <div class="plate blue"> <span class="logo-3">3</span>
+                    </div>
+                </div>
+                <span class="logo-tv-text">tv</span>
+            </div>
+
+            <div class="slogan">
+                <span class="slogan-main">LA TÉLÉ</span>
+                <span class="slogan-interactive">INTERACTIVE</span>
+            </div>
+        </div>
+
+        <div class="video-wrapper">
+            <video id="player" controls playsinline poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240' viewBox='0 0 400 240'%3E%3Crect width='400' height='240' fill='%231D4E89'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='%23FBC02D' text-anchor='middle' dy='.3em'%3E3TV%3C/text%3E%3C/svg%3E">
+                <source src="#" type="video/mp4">
+                <p>Direct 3TV – Canal+ n°426 / TNT n°7</p>
+            </video>
+        </div>
+
+        <div class="reactions">
+            <button class="reaction-btn" onclick="lancerVideo()">▶️ Regarder</button>
+            <button class="reaction-btn" onclick="partager()">📤 Partager</button>
+            <button class="reaction-btn" onclick="telecharger()">⬇️ Télécharger</button>
+        </div>
+
+        <div class="horizontal-section">
+            <div class="horizontal-title">
+                <span>📢 PARTENAIRES 3TV</span>
+                <span style="font-size: 12px;">← glisser →</span>
+            </div>
+            <div class="marquee-container">
+                <div id="pub-track" class="marquee-track"></div>
+            </div>
+        </div>
+
+        <div class="horizontal-section">
+            <div class="horizontal-title">
+                <span>📺 DERNIÈRES ÉMISSIONS</span>
+                <span style="font-size: 12px;">← glisser →</span>
+            </div>
+            <div class="marquee-container">
+                <div id="emissions-track" class="marquee-track"></div>
+            </div>
+        </div>
+
+        <div class="search" style="margin-top: 15px;">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher une émission...">
+        </div>
+
+        <div class="reception-info" id="receptionInfo">
+            📡 Canal+ n°426 &nbsp;&nbsp;|&nbsp;&nbsp; 📺 TNT n°7 &nbsp;&nbsp;|&nbsp;&nbsp; 🌍 www.3tv.bf
+            <br><br>
+            <a href="https://wa.me/22663989773?text=Bonjour%203TV" target="_blank" class="whatsapp-btn">
+                💬 WhatsApp : 63 98 97 73
+            </a>
+        </div>
+
+        <div class="footer">
+            3TV – La télévision interactive du Burkina
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // CRÉÉ PAR : KONSÉGUÉ RÉLWENDÉ CHRISTIAN
+        // CONTACT : 06755216
+        // DATE : 01 AVRIL 2026
+        // CHAÎNE : 3TV – NOUVEAU LOGO 3D IMPLÉMENTÉ
+        // DIFFUSION : Canal+ n°426 / TNT n°7
+        // ============================================================
+
+        // Configuration 3TV (Unchanged)
+        let CONFIG_3TV = {
+            directUrl: "",
+            emissions: [
+                { nom: "3TV Matin", type: "Journal", heure: "07h", url: "" },
+                { nom: "Le Grand Débat", type: "Talk-show", heure: "12h30", url: "" },
+                { nom: "Édition 19h", type: "Actualités", heure: "19h", url: "" },
+                { nom: "Interactive Club", type: "Divertissement", heure: "20h30", url: "" },
+                { nom: "Sport 3", type: "Sport", heure: "22h", url: "" },
+                { nom: "Focus Jeunes", type: "Éducatif", heure: "16h", url: "" },
+                { nom: "Ciné 3", type: "Cinéma", heure: "23h", url: "" }
+            ],
+            pubs: [
+                { titre: "Orange Burkina", texte: "La fibre 3TV", url: "https://www.orange.bf" },
+                { titre: "Coris Bank", texte: "Votre partenaire", url: "https://www.coris.bf" },
+                { titre: "Brakina", texte: "Énergie locale", url: "https://www.brakina.bf" },
+                { titre: "ONATEL", texte: "Connectez-vous", url: "https://www.onatel.bf" }
+            ],
+            siteInfos: {
+                whatsapp: "63 98 97 73",
+                canal: "Canal+ n°426",
+                tnt: "TNT n°7",
+                website: "www.3tv.bf"
+            }
+        };
+
+        // ========== Scripts logic (Unchanged) ==========
+        function createMarquee(containerId, items, createItemHtml) {
+            const container = document.getElementById(containerId);
+            if (!container || items.length === 0) return;
+            let html = '';
+            items.forEach(item => {
+                html += createItemHtml(item);
+            });
+            container.innerHTML = html + html;
+            const duration = Math.max(items.length * 2.8, 15);
+            container.style.animation = `scroll ${duration}s linear infinite`;
+        }
+
+        function generateImagePlaceholder(title, bgColor = "#e0e0e0", textColor = "#1D4E89") {
+            const shortTitle = title.substring(0, 12);
+            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='90' viewBox='0 0 140 90'%3E%3Crect width='140' height='90' fill='%23FBC02D'/%3E%3Crect x='5' y='5' width='130' height='80' fill='%23f4f4f4'/%3E%3Ctext x='50%25' y='55%25' font-size='12' font-weight='bold' text-anchor='middle' fill='%231D4E89' dy='.3em'%3E${encodeURIComponent(shortTitle)}%3C/text%3E%3C/svg%3E`;
+        }
+
+        function afficherContenu() {
+            const createEmissionHtml = (em) => {
+                const imgSrc = generateImagePlaceholder(em.nom, "#FBC02D", "#1D4E89");
+                return `
+                    <div class="emission-card" onclick="lireEmission('${em.url || ''}', '${em.nom.replace(/'/g, "\\'")}')">
+                        <img src="${imgSrc}" alt="${em.nom}">
+                        <h4>${em.nom}</h4>
+                        ${em.heure ? `<p>🕒 ${em.heure}</p>` : '<p>À l’antenne</p>'}
+                        <button class="small-btn">▶️ Regarder</button>
+                    </div>
+                `;
+            };
+            createMarquee('emissions-track', CONFIG_3TV.emissions, createEmissionHtml);
+            
+            const createPubHtml = (pub) => {
+                const imgPub = generateImagePlaceholder(pub.titre, "#D32F2F", "#FFFFFF");
+                return `
+                    <div class="pub-card" onclick="window.open('${pub.url}', '_blank')">
+                        <img src="${imgPub}" alt="${pub.titre}">
+                        <h4>${pub.titre}</h4>
+                        <p>${pub.texte || 'Cliquez pour découvrir'}</p>
+                    </div>
+                `;
+            };
+            createMarquee('pub-track', CONFIG_3TV.pubs, createPubHtml);
+        }
+
+        function chargerConfig() {
+            const saved = localStorage.getItem('3tv_config');
+            if (saved) {
+                try {
+                    const config = JSON.parse(saved);
+                    CONFIG_3TV = { ...CONFIG_3TV, ...config };
+                    CONFIG_3TV.emissions = config.emissions || CONFIG_3TV.emissions;
+                    CONFIG_3TV.pubs = config.pubs || CONFIG_3TV.pubs;
+                    CONFIG_3TV.siteInfos = config.siteInfos || CONFIG_3TV.siteInfos;
+                } catch(e) {}
+            }
+            mettreAJourInfosSite();
+            mettreAJourDirect();
+            afficherContenu();
+        }
+
+        function mettreAJourInfosSite() {
+            const infos = CONFIG_3TV.siteInfos;
+            const receptionDiv = document.getElementById('receptionInfo');
+            if (receptionDiv) {
+                receptionDiv.innerHTML = `
+                    📡 ${infos.canal} &nbsp;&nbsp;|&nbsp;&nbsp; 📺 ${infos.tnt} &nbsp;&nbsp;|&nbsp;&nbsp; 🌍 ${infos.website}
+                    <br><br>
+                    <a href="https://wa.me/226${infos.whatsapp.replace(/\s/g, '')}?text=Bonjour%203TV" target="_blank" class="whatsapp-btn">
+                        💬 WhatsApp : ${infos.whatsapp}
+                    </a>
+                `;
+            }
+        }
+
+        function mettreAJourDirect() {
+            if (CONFIG_3TV.directUrl && CONFIG_3TV.directUrl !== "") {
+                const video = document.getElementById('player');
+                const source = video.querySelector('source');
+                source.src = CONFIG_3TV.directUrl;
+                video.load();
+            }
+        }
+
+        window.lancerVideo = function() {
+            const video = document.getElementById('player');
+            const source = video.querySelector('source');
+            const lienActuel = source ? source.src : "";
+            if (lienActuel && lienActuel !== "#" && lienActuel !== "" && lienActuel !== window.location.href) {
+                video.play().catch(e => console.log("Lecture auto bloquée"));
+            } else {
+                source.src = "https://www.w3schools.com/html/mov_bbb.mp4";
+                video.load();
+                video.play().catch(() => alert("Cliquez sur lecture pour démarrer le direct 3TV"));
+            }
+        };
+
+        window.lireEmission = function(url, titre) {
+            if (url && url !== "") {
+                const video = document.getElementById('player');
+                const source = video.querySelector('source');
+                source.src = url;
+                video.load();
+                video.play().catch(e => console.log("auto-play"));
+            } else {
+                alert(`📺 "${titre}" – Cette émission sera disponible très bientôt sur 3TV. Restez connectés !`);
+            }
+        };
+
+        window.partager = function() {
+            const shareText = "📺 Regardez 3TV – La télévision interactive du Burkina ! Canal+ n°426, TNT n°7. Toute l'info, divertissement et interactivité.";
+            if (navigator.share) {
+                navigator.share({
+                    title: '3TV – La télé interactive',
+                    text: shareText,
+                    url: window.location.href,
+                }).catch(() => {});
+            } else {
+                alert(`📱 ${shareText}\n\nPartagez ce lien avec vos proches !`);
+            }
+        };
+
+        window.telecharger = function() {
+            alert('📥 L\'application mobile 3TV arrive bientôt sur Play Store et App Store. Restez à l\'écoute !');
+        };
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const terme = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.emission-card');
+            cards.forEach(card => {
+                const titre = card.querySelector('h4')?.innerText.toLowerCase() || "";
+                card.style.display = titre.includes(terme) ? '' : 'none';
+            });
+        });
+
+        chargerConfig();
+    </script>
+</body>
+  </html>
+    
