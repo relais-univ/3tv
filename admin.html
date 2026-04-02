@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3TV – Administration Interactive</title>
+    <meta name="theme-color" content="#1D4E89">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        header {
+            background: linear-gradient(135deg, #1D4E89, #2a6dad);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+        .logout {
+            background: #D32F2F;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 3px solid #ddd;
+        }
+        h2 {
+            color: #1D4E89;
+            font-size: 17px;
+            margin-bottom: 15px;
+            border-left: 5px solid #FBC02D;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        label { display: block; font-size: 12px; font-weight: bold; color: #666; margin-top: 10px; }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+        input:focus { border-color: #1D4E89; outline: none; background: #fff; }
+        button {
+            background: #1D4E89;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        button.secondary { background: #D32F2F; }
+        button.danger { background: #ffeded; color: #D32F2F; border: 1px solid #D32F2F; padding: 5px 10px; font-size: 12px; }
+        .toggle-btn { background: #2e7d32; }
+        .toggle-btn.off { background: #9e9e9e; }
+        
+        .item-box {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+        .success-flash {
+            background: #2e7d32;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        /* LOGIN OVERLAY */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1D4E89;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .logo-login {
+            font-size: 40px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #1D4E89;
+        }
+        .logo-login span { color: #D32F2F; }
+        .error-msg { color: #D32F2F; font-size: 13px; margin-top: 10px; display: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <div class="logo-login">3<span>TV</span></div>
+            <h3 style="margin-bottom: 20px; color: #444;">Administration Interactive</h3>
+            <input type="password" id="adminPassword" placeholder="Code d'accès" style="text-align: center; font-size: 18px; letter-spacing: 4px;">
+            <button onclick="verifierAcces()" style="width: 100%; padding: 15px;">DÉVERROUILLER</button>
+            <div id="loginError" class="error-msg">⚠️ Code incorrect</div>
+        </div>
+    </div>
+
+    <div id="adminContent" style="display: none;">
+        <div class="container">
+            <header>
+                <h1>3TV – Gestion de Contenu</h1>
+                <span class="logout" onclick="deconnexion()">Quitter</span>
+            </header>
+
+            <div id="flashMsg" class="success-flash">Mise à jour réussie !</div>
+
+            <div class="card">
+                <h2>📡 FLUX DIRECT (Live)</h2>
+                <label>Lien du streaming (m3u8 ou mp4) :</label>
+                <input type="text" id="directUrl" placeholder="https://votre-flux.com/live.m3u8">
+                <button onclick="sauverDirect()">Mettre à jour le Direct</button>
+            </div>
+
+            <div class="card">
+                <h2>📱 INFOS DE RÉCEPTION</h2>
+                <label>Numéro WhatsApp :</label>
+                <input type="text" id="whatsapp" placeholder="63 98 97 73">
+                <label>Position Canal+ :</label>
+                <input type="text" id="canal" placeholder="Canal+ n°426">
+                <label>Position TNT :</label>
+                <input type="text" id="tnt" placeholder="TNT n°7">
+                <label>Lien du site :</label>
+                <input type="text" id="website" placeholder="www.3tv.bf">
+                <button onclick="sauverInfos()">Enregistrer les infos</button>
+            </div>
+
+            <div class="card">
+                <h2>📺 ÉMISSIONS & REPLAYS 
+                    <button id="btnToggleEmissions" class="toggle-btn" onclick="toggleStatus('emissions')">ON</button>
+                </h2>
+                <div id="list-emissions"></div>
+                <button class="secondary" style="margin-top: 10px;" onclick="ajouterEmission()">+ Ajouter une émission</button>
+            </div>
+
+            <div class="card">
+                <h2>📢 PARTENAIRES & PUBS 
+                    <button id="btnTogglePubs" class="toggle-btn" onclick="toggleStatus('pubs')">ON</button>
+                </h2>
+                <div id="list-pubs"></div>
+                <button class="secondary" style="margin-top: 10px;" onclick="ajouterPub()">+ Ajouter un partenaire</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION ADMIN 3TV
+        // MOT DE PASSE : 101010
+        // ============================================================
+
+        const MOT_DE_PASSE_VALIDE = "101010";
+
+        let config = {
+            directUrl: "",
+            emissions: [],
+            pubs: [],
+            siteInfos: { whatsapp: "63 98 97 73", canal: "Canal+ n°426", tnt: "TNT n°7", website: "www.3tv.bf" },
+            emissionsEnabled: true,
+            pubsEnabled: true
+        };
+
+        function verifierAcces() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === MOT_DE_PASSE_VALIDE) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                chargerDonnees();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function chargerDonnees() {
+            const saved = localStorage.getItem('3tv_config');
+            if (saved) {
+                config = JSON.parse(saved);
+            }
+            
+            // Remplir les champs
+            document.getElementById('directUrl').value = config.directUrl || "";
+            document.getElementById('whatsapp').value = config.siteInfos.whatsapp;
+            document.getElementById('canal').value = config.siteInfos.canal;
+            document.getElementById('tnt').value = config.siteInfos.tnt;
+            document.getElementById('website').value = config.siteInfos.website;
+            
+            rafraichirListes();
+            updateToggleButtons();
+        }
+
+        function rafraichirListes() {
+            // Liste Emissions
+            const emContainer = document.getElementById('list-emissions');
+            emContainer.innerHTML = config.emissions.map((em, i) => `
+                <div class="item-box">
+                    <input type="text" placeholder="Nom de l'émission" value="${em.nom}" onchange="updateEm(${i}, 'nom', this.value)">
+                    <input type="text" placeholder="Heure (ex: 20h30)" value="${em.heure}" onchange="updateEm(${i}, 'heure', this.value)">
+                    <input type="text" placeholder="Lien vidéo" value="${em.url}" onchange="updateEm(${i}, 'url', this.value)">
+                    <button class="danger" onclick="supprEm(${i})">Supprimer</button>
+                </div>
+            `).join('');
+
+            // Liste Pubs
+            const pubContainer = document.getElementById('list-pubs');
+            pubContainer.innerHTML = config.pubs.map((pub, i) => `
+                <div class="item-box">
+                    <input type="text" placeholder="Nom du partenaire" value="${pub.titre}" onchange="updatePub(${i}, 'titre', this.value)">
+                    <input type="text" placeholder="Texte publicitaire" value="${pub.texte}" onchange="updatePub(${i}, 'texte', this.value)">
+                    <input type="text" placeholder="Lien site web" value="${pub.url}" onchange="updatePub(${i}, 'url', this.value)">
+                    <button class="danger" onclick="supprPub(${i})">Supprimer</button>
+                </div>
+            `).join('');
+        }
+
+        // Fonctions de sauvegarde
+        function sauverTout() {
+            localStorage.setItem('3tv_config', JSON.stringify(config));
+            const flash = document.getElementById('flashMsg');
+            flash.style.display = 'block';
+            setTimeout(() => flash.style.display = 'none', 2000);
+        }
+
+        function sauverDirect() {
+            config.directUrl = document.getElementById('directUrl').value;
+            sauverTout();
+        }
+
+        function sauverInfos() {
+            config.siteInfos = {
+                whatsapp: document.getElementById('whatsapp').value,
+                canal: document.getElementById('canal').value,
+                tnt: document.getElementById('tnt').value,
+                website: document.getElementById('website').value
+            };
+            sauverTout();
+        }
+
+        // Gestion Emissions
+        function ajouterEmission() {
+            config.emissions.push({ nom: "Nouvelle émission", heure: "00h00", url: "" });
+            rafraichirListes();
+            sauverTout();
+        }
+        function updateEm(i, key, val) { config.emissions[i][key] = val; sauverTout(); }
+        function supprEm(i) { config.emissions.splice(i, 1); rafraichirListes(); sauverTout(); }
+
+        // Gestion Pubs
+        function ajouterPub() {
+            config.pubs.push({ titre: "Nouveau Partenaire", texte: "Description", url: "" });
+            rafraichirListes();
+            sauverTout();
+        }
+        function updatePub(i, key, val) { config.pubs[i][key] = val; sauverTout(); }
+        function supprPub(i) { config.pubs.splice(i, 1); rafraichirListes(); sauverTout(); }
+
+        // Toggles
+        function toggleStatus(type) {
+            if (type === 'emissions') config.emissionsEnabled = !config.emissionsEnabled;
+            if (type === 'pubs') config.pubsEnabled = !config.pubsEnabled;
+            updateToggleButtons();
+            sauverTout();
+        }
+
+        function updateToggleButtons() {
+            const btnE = document.getElementById('btnToggleEmissions');
+            btnE.innerText = config.emissionsEnabled ? "ON" : "OFF";
+            btnE.className = config.emissionsEnabled ? "toggle-btn" : "toggle-btn off";
+
+            const btnP = document.getElementById('btnTogglePubs');
+            btnP.innerText = config.pubsEnabled ? "ON" : "OFF";
+            btnP.className = config.pubsEnabled ? "toggle-btn" : "toggle-btn off";
+        }
+
+        function deconnexion() { location.reload(); }
+        
+        // Entrée clavier pour le mot de passe
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifierAcces();
+        });
+    </script>
+</body>
+  </html>
+  
