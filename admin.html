@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3TV – Administration Totale</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: sans-serif; padding: 15px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        header { background: #1D4E89; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #1D4E89; font-size: 16px; margin-bottom: 15px; border-left: 4px solid #FBC02D; padding-left: 10px; }
+        label { display: block; font-size: 11px; font-weight: bold; color: #555; margin-top: 10px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { background: #1D4E89; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-add { background: #D32F2F; margin-top: 5px; }
+        .btn-danger { background: #ffeded; color: #D32F2F; border: 1px solid #D32F2F; padding: 5px; font-size: 11px; width: auto; }
+        .item-box { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #eee; }
+        .login-overlay { position: fixed; inset: 0; background: #1D4E89; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2>ACCÈS 3TV</h2>
+            <input type="password" id="adminPassword" placeholder="Code secret" style="text-align: center;">
+            <button onclick="verifierAcces()">CONNEXION</button>
+        </div>
+    </div>
+
+    <div id="adminContent" style="display: none;">
+        <div class="container">
+            <header>
+                <h3>CONFIG GENERALE</h3>
+                <span onclick="location.reload()" style="cursor:pointer">Quitter</span>
+            </header>
+
+            <div class="card">
+                <h2>📡 CANAUX & RÉSEAUX</h2>
+                <label>Canal+ :</label>
+                <input type="text" id="canal" onchange="sauverElement('canal', this.value)">
+                <label>TNT :</label>
+                <input type="text" id="tnt" onchange="sauverElement('tnt', this.value)">
+                <label>Site Web :</label>
+                <input type="text" id="website" onchange="sauverElement('website', this.value)">
+                <label>TikTok :</label>
+                <input type="text" id="tiktok" onchange="sauverElement('tiktok', this.value)">
+            </div>
+
+            <div class="card">
+                <h2>⚙️ OPTIONS APP</h2>
+                <label>Bouton Téléchargement :</label>
+                <select id="allowDownload" onchange="sauverElement('allowDownload', this.value)">
+                    <option value="oui">✅ Activé</option>
+                    <option value="non">❌ Désactivé</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <h2>🔴 FLUX LIVE</h2>
+                <input type="text" id="directUrl" placeholder="Lien .m3u8 ou .mp4">
+                <button onclick="sauverElement('directUrl', document.getElementById('directUrl').value)">METTRE À JOUR LE DIRECT</button>
+            </div>
+
+            <div class="card">
+                <h2>📺 REPLAYS</h2>
+                <div id="list-emissions"></div>
+                <button class="btn-add" onclick="ajouterEmission()">+ AJOUTER EMISSION</button>
+            </div>
+
+            <div class="card">
+                <h2>📢 PARTENAIRES</h2>
+                <div id="list-pubs"></div>
+                <button class="btn-add" onclick="ajouterPub()">+ AJOUTER PARTENAIRE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEU3NRoFDPuGbt3PlgY5YBjOccq_HCrUM",
+            authDomain: "tv-b6897.firebaseapp.com",
+            databaseURL: "https://tv-b6897-default-rtdb.firebaseio.com",
+            projectId: "tv-b6897",
+            storageBucket: "tv-b6897.firebasestorage.app",
+            messagingSenderId: "962702463807",
+            appId: "1:962702463807:web:487f8d597f8467c41eb98a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let currentConfig = {};
+
+        function verifierAcces() {
+            if (document.getElementById('adminPassword').value === "101010") {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                db.ref('3tv_config').on('value', (snap) => {
+                    currentConfig = snap.val() || {};
+                    remplir();
+                });
+            }
+        }
+
+        function remplir() {
+            document.getElementById('canal').value = currentConfig.canal || "Canal+ n°426";
+            document.getElementById('tnt').value = currentConfig.tnt || "TNT n°7";
+            document.getElementById('website').value = currentConfig.website || "www.3tv.bf";
+            document.getElementById('tiktok').value = currentConfig.tiktok || "@3tv.bf";
+            document.getElementById('allowDownload').value = currentConfig.allowDownload || "oui";
+            document.getElementById('directUrl').value = currentConfig.directUrl || "";
+            
+            const ems = currentConfig.emissions || [];
+            document.getElementById('list-emissions').innerHTML = ems.map((em, i) => `
+                <div class="item-box">
+                    <input type="text" value="${em.nom}" onchange="upL('emissions',${i},'nom',this.value)">
+                    <input type="text" value="${em.url}" onchange="upL('emissions',${i},'url',this.value)">
+                    <button class="btn-danger" onclick="delL('emissions',${i})">Supprimer</button>
+                </div>`).join('');
+
+            const pubs = currentConfig.pubs || [];
+            document.getElementById('list-pubs').innerHTML = pubs.map((p, i) => `
+                <div class="item-box">
+                    <input type="text" value="${p.titre}" onchange="upL('pubs',${i},'titre',this.value)">
+                    <input type="text" value="${p.url}" onchange="upL('pubs',${i},'url',this.value)">
+                    <button class="btn-danger" onclick="delL('pubs',${i})">Supprimer</button>
+                </div>`).join('');
+        }
+
+        function sauverElement(k, v) { db.ref('3tv_config/' + k).set(v); }
+        function upL(t, i, k, v) { currentConfig[t][i][k] = v; sauverElement(t, currentConfig[t]); }
+        function delL(t, i) { currentConfig[t].splice(i,1); sauverElement(t, currentConfig[t]); }
+        function ajouterEmission() { 
+            const l = currentConfig.emissions || []; 
+            l.push({nom:"Nouvelle", url:""}); sauverElement('emissions', l); 
+        }
+        function ajouterPub() { 
+            const l = currentConfig.pubs || []; 
+            l.push({titre:"Partenaire", url:""}); sauverElement('pubs', l); 
+        }
+    </script>
+</body>
+</html>
