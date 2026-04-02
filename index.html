@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>3TV – La télévision interactive du Burkina</title>
+    <meta name="theme-color" content="#1D4E89">
+    <meta name="author" content="KONSÉGUÉ RÉLWENDÉ CHRISTIAN">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; }
+        .container { max-width: 480px; margin: 0 auto; }
+
+        /* ========== LOGO 3TV 3D ========== */
+        .logo-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+        .logo-main-container { display: flex; align-items: center; justify-content: center; position: relative; padding-right: 40px; }
+        .plates-container { position: relative; width: 80px; height: 90px; display: flex; justify-content: center; align-items: center; }
+        .plate { position: absolute; border-radius: 16px; box-shadow: 2px 2px 6px rgba(0,0,0,0.2); transition: 0.3s ease; }
+        .plate.yellow { background: #FBC02D; width: 70px; height: 80px; left: 0; bottom: 0; z-index: 1; }
+        .plate.red { background: #D32F2F; width: 70px; height: 80px; left: 10px; bottom: 5px; z-index: 2; }
+        .plate.blue { background: linear-gradient(135deg, #1D4E89, #2a6dad); width: 80px; height: 90px; left: 20px; top: 0; z-index: 3; display: flex; justify-content: center; align-items: center; }
+        .logo-3 { font-size: 64px; font-weight: 800; color: #FFFFFF; letter-spacing: -2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.15); }
+        .logo-tv-text { font-size: 52px; font-weight: 800; color: #1D4E89; margin-left: 25px; margin-top: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.15); }
+        .slogan { text-align: center; margin-top: 20px; margin-bottom: 20px; font-size: 15px; font-weight: 500; }
+        .slogan-main { color: #424242; letter-spacing: 1px; font-weight: 600; }
+        .slogan-interactive { color: #8B1A1A; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
+
+        /* VIDÉO */
+        .video-wrapper { background: black; border-radius: 16px; overflow: hidden; margin: 12px 0 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        video { width: 100%; display: block; min-height: 200px; background: black; }
+
+        .reactions { display: flex; justify-content: center; gap: 12px; margin: 15px 0; }
+        .reaction-btn { background: #f0f0f0; border: none; padding: 12px 20px; border-radius: 40px; font-size: 15px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+        /* SECTIONS HORIZONTALES */
+        .horizontal-section { margin: 20px 0; overflow: hidden; position: relative; }
+        .horizontal-title { color: #1D4E89; margin-bottom: 12px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .marquee-container { overflow-x: hidden; width: 100%; }
+        .marquee-track { display: flex; gap: 15px; animation: scroll 20s linear infinite; width: max-content; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .emission-card, .pub-card { flex: 0 0 140px; background: #f9f9f9; border-radius: 12px; padding: 10px; border-left: 4px solid #D32F2F; text-align: center; }
+        .emission-card h4, .pub-card h4 { font-size: 13px; margin: 5px 0; color: #1D4E89; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .emission-card p, .pub-card p { font-size: 10px; color: #666; }
+        .small-btn { background: #D32F2F; color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 11px; margin-top: 6px; width: 100%; }
+
+        /* RECHERCHE */
+        .search input { width: 100%; padding: 16px 20px; border-radius: 40px; border: 1px solid #e0e0e0; font-size: 16px; outline: none; }
+
+        /* INFOS RÉCEPTION & TIKTOK */
+        .reception-info { background: linear-gradient(135deg, #f5f7fa, #e9ecef); border-radius: 12px; padding: 12px; margin: 20px 0; text-align: center; font-size: 13px; border-left: 5px solid #FBC02D; }
+        .tiktok-btn { background: #000000; color: white; padding: 10px 25px; border-radius: 40px; text-decoration: none; display: inline-block; margin-top: 10px; font-weight: bold; }
+        
+        .footer { text-align: center; color: #aaa; font-size: 13px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo-main-container">
+                <div class="plates-container">
+                    <div class="plate yellow"></div> <div class="plate red"></div> <div class="plate blue"> <span class="logo-3">3</span></div>
+                </div>
+                <span class="logo-tv-text">tv</span>
+            </div>
+            <div class="slogan">
+                <span class="slogan-main">LA TÉLÉ</span>
+                <span class="slogan-interactive">INTERACTIVE</span>
+            </div>
+        </div>
+
+        <div class="video-wrapper">
+            <video id="player" controls playsinline poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='240'%3E%3Crect width='400' height='240' fill='%231D4E89'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='%23FBC02D' text-anchor='middle'%3E3TV DIRECT%3C/text%3E%3C/svg%3E">
+                <source src="#" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="reactions">
+            <button class="reaction-btn" onclick="lancerVideo()">▶️ Regarder</button>
+            <button class="reaction-btn" onclick="partager()">📤 Partager</button>
+            <button class="reaction-btn" id="btnDownload" onclick="telecharger()">⬇️ Télécharger</button>
+        </div>
+
+        <div class="horizontal-section">
+            <div class="horizontal-title"><span>📢 PARTENAIRES 3TV</span> <span style="font-size: 12px;">← glisser →</span></div>
+            <div class="marquee-container"><div id="pub-track" class="marquee-track"></div></div>
+        </div>
+
+        <div class="horizontal-section">
+            <div class="horizontal-title"><span>📺 DERNIÈRES ÉMISSIONS</span> <span style="font-size: 12px;">← glisser →</span></div>
+            <div class="marquee-container"><div id="emissions-track" class="marquee-track"></div></div>
+        </div>
+
+        <div class="search" style="margin-top: 15px;">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher une émission...">
+        </div>
+
+        <div class="reception-info" id="receptionInfo">
+            📡 Canal+ n°426 &nbsp;&nbsp;|&nbsp;&nbsp; 📺 TNT n°7 &nbsp;&nbsp;|&nbsp;&nbsp; 🌍 www.3tv.bf
+            <br><br>
+            <a href="https://www.tiktok.com/@3tv.bf" id="tiktokLink" target="_blank" class="tiktok-btn">🎵 TikTok : @3tv.bf</a>
+        </div>
+
+        <div class="footer">3TV – La télévision interactive du Burkina</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEU3NRoFDPuGbt3PlgY5YBjOccq_HCrUM",
+            authDomain: "tv-b6897.firebaseapp.com",
+            databaseURL: "https://tv-b6897-default-rtdb.firebaseio.com",
+            projectId: "tv-b6897",
+            storageBucket: "tv-b6897.firebasestorage.app",
+            messagingSenderId: "962702463807",
+            appId: "1:962702463807:web:487f8d597f8467c41eb98a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 2. DONNÉES DE DÉMO (Toujours prêtes si Firebase est vide)
+        const DEMO = {
+            emissions: [
+                { nom: "3TV Matin", heure: "07h", url: "" },
+                { nom: "Le Grand Débat", heure: "12h30", url: "" },
+                { nom: "Édition 19h", heure: "19h", url: "" },
+                { nom: "Interactive Club", heure: "20h30", url: "" }
+            ],
+            pubs: [
+                { titre: "Orange Burkina", url: "https://www.orange.bf" },
+                { titre: "Coris Bank", url: "https://www.coris.bf" },
+                { titre: "Brakina", url: "https://www.brakina.bf" }
+            ]
+        };
+
+        function generateImg(title) {
+            return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='90'%3E%3Crect width='140' height='90' fill='%23FBC02D'/%3E%3Crect x='5' y='5' width='130' height='80' fill='%23f4f4f4'/%3E%3Ctext x='50%25' y='55%25' font-size='11' font-weight='bold' text-anchor='middle' fill='%231D4E89'%3E${encodeURIComponent(title)}%3C/text%3E%3C/svg%3E`;
+        }
+
+        // 3. ÉCOUTE FIREBASE
+        db.ref('3tv_config').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            
+            // --- MISE À JOUR DES INFOS GÉNÉRALES ---
+            const canal = data.canal || "Canal+ n°426";
+            const tnt = data.tnt || "TNT n°7";
+            const web = data.website || "www.3tv.bf";
+            const tiktok = data.tiktok || "@3tv.bf";
+            
+            document.getElementById('receptionInfo').innerHTML = `
+                📡 ${canal} &nbsp;&nbsp;|&nbsp;&nbsp; 📺 ${tnt} &nbsp;&nbsp;|&nbsp;&nbsp; 🌍 ${web}
+                <br><br>
+                <a href="https://www.tiktok.com/${tiktok}" target="_blank" class="tiktok-btn">🎵 TikTok : ${tiktok}</a>
+            `;
+
+            // --- AUTORISATION TÉLÉCHARGEMENT ---
+            document.getElementById('btnDownload').style.display = (data.allowDownload === "non") ? "none" : "inline-flex";
+
+            // --- FLUX DIRECT ---
+            if (data.directUrl) {
+                const v = document.getElementById('player');
+                if (v.querySelector('source').src !== data.directUrl) {
+                    v.querySelector('source').src = data.directUrl;
+                    v.load();
+                }
+            }
+
+            // --- ÉMISSIONS (Admin ou Démo) ---
+            const listEm = (data.emissions && data.emissions.length > 0) ? data.emissions : DEMO.emissions;
+            let htmlEm = "";
+            listEm.forEach(em => {
+                htmlEm += `
+                    <div class="emission-card" onclick="lireEmission('${em.url}', '${em.nom}')">
+                        <img src="${generateImg(em.nom)}">
+                        <h4>${em.nom}</h4><p>🕒 ${em.heure || '--'}</p>
+                        <button class="small-btn">▶️ Regarder</button>
+                    </div>`;
+            });
+            document.getElementById('emissions-track').innerHTML = htmlEm + htmlEm;
+
+            // --- PARTENAIRES (Admin ou Démo) ---
+            const listPub = (data.pubs && data.pubs.length > 0) ? data.pubs : DEMO.pubs;
+            let htmlPub = "";
+            listPub.forEach(p => {
+                htmlPub += `
+                    <div class="pub-card" onclick="window.open('${p.url}', '_blank')">
+                        <img src="${generateImg(p.titre)}">
+                        <h4>${p.titre}</h4><p>Partenaire Officiel</p>
+                    </div>`;
+            });
+            document.getElementById('pub-track').innerHTML = htmlPub + htmlPub;
+        });
+
+        // 4. FONCTIONS BOUTONS
+        window.lancerVideo = () => { document.getElementById('player').play(); };
+        window.lireEmission = (url, titre) => {
+            if(url) {
+                const v = document.getElementById('player');
+                v.querySelector('source').src = url;
+                v.load(); v.play();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else { alert(`📺 ${titre} : Replay bientôt disponible.`); }
+        };
+        window.partager = () => { navigator.share ? navigator.share({title:'3TV', url:location.href}) : alert(location.href); };
+        window.telecharger = () => { alert("L'application arrive bientôt !"); };
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const t = e.target.value.toLowerCase();
+            document.querySelectorAll('.emission-card').forEach(c => {
+                c.style.display = c.innerText.toLowerCase().includes(t) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+  </html>
+  
