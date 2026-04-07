@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3TV – Administration Intelligente</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --primary: #1D4E89; --gold: #FBC02D; --green: #25D366; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
+        
+        /* ÉCRAN DE VERROUILLAGE INTELLIGENT */
+        #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: 0.5s; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 85%; max-width: 340px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .login-card h2 { color: var(--primary); font-size: 18px; margin-bottom: 20px; }
+        .code-input { width: 100%; padding: 15px; text-align: center; font-size: 28px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px; letter-spacing: 8px; outline: none; transition: 0.3s; }
+        .code-input:focus { border-color: var(--gold); }
+        
+        /* CONTENU ADMIN */
+        #admin-content { display: none; max-width: 500px; margin: 0 auto; animation: fadeIn 0.5s; }
+        .section-card { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 5px solid var(--primary); }
+        h1 { font-size: 22px; text-align: center; color: var(--primary); margin-bottom: 25px; }
+        h3 { font-size: 14px; margin: 0 0 12px 0; color: #555; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box; margin-bottom: 8px; outline: none; }
+        
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        .btn-update { background: var(--primary); color: white; }
+        .btn-add { background: var(--green); color: white; margin-top: 5px; }
+        .btn-update:active, .btn-add:active { transform: scale(0.97); }
+
+        .item-list { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .item { display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #eee; font-size: 14px; }
+        .btn-del { background: #ffeded; color: #d32f2f; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .shake { animation: shake 0.4s; border-color: #d32f2f !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-card" id="card-box">
+        <h2>🔑 CODE D'ACCÈS</h2>
+        <input type="password" id="pass-code" class="code-input" placeholder="••••••" maxlength="6" inputmode="numeric">
+        <button class="btn-action btn-add" style="background: var(--gold); color: var(--primary);" onclick="verifierCode()">OUVRIR LA SESSION</button>
+    </div>
+</div>
+
+<div id="admin-content">
+    <h1>3TV – Studio Master 📺</h1>
+
+    <div class="section-card">
+        <h3>🔴 Flux du Direct</h3>
+        <input type="text" id="directUrl" placeholder="Lien .m3u8 ou Vidéo">
+        <button class="btn-action btn-update" onclick="updateField('directUrl')">METTRE À JOUR LE DIRECT</button>
+    </div>
+
+    <div class="section-card">
+        <h3>✍️ Slogan de la Chaîne</h3>
+        <input type="text" id="slogan" placeholder="Votre slogan ici">
+        <button class="btn-action btn-update" onclick="updateField('slogan')">CHANGER LE SLOGAN</button>
+    </div>
+
+    <div class="section-card">
+        <h3>🟢 Contact WhatsApp</h3>
+        <input type="text" id="whatsapp" placeholder="Ex: 22625407871">
+        <button class="btn-action btn-update" onclick="updateField('whatsapp')">METTRE À JOUR LE NUMÉRO</button>
+    </div>
+
+    <div class="section-card">
+        <h3>📱 Réseaux Sociaux</h3>
+        <input type="text" id="tiktok" placeholder="Nom du compte TikTok">
+        <button class="btn-action btn-update" onclick="updateField('tiktok')">METTRE À JOUR TIKTOK</button>
+    </div>
+
+    <div class="section-card">
+        <h3>🎬 Replays & Émissions</h3>
+        <input type="text" id="em-nom" placeholder="Titre de l'émission">
+        <input type="text" id="em-url" placeholder="Lien vidéo">
+        <button class="btn-action btn-add" onclick="addItem('emissions')">AJOUTER AU CATALOGUE</button>
+        <div id="list-emissions" class="item-list"></div>
+    </div>
+
+    <div class="section-card">
+        <h3>🤝 Partenaires & Pubs</h3>
+        <input type="text" id="pub-nom" placeholder="Nom du partenaire">
+        <input type="text" id="pub-img" placeholder="Lien du logo/image">
+        <button class="btn-action btn-add" onclick="addItem('pubs')">AJOUTER LE PARTENAIRE</button>
+        <div id="list-pubs" class="item-list"></div>
+    </div>
+</div>
+
+<script>
+    // Configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDEU3NRoFDPuGbt3PlgY5YBjOccq_HCrUM",
+        authDomain: "tv-b6897.firebaseapp.com",
+        databaseURL: "https://tv-b6897-default-rtdb.firebaseio.com",
+        projectId: "tv-b6897",
+        storageBucket: "tv-b6897.firebasestorage.app",
+        messagingSenderId: "962702463807",
+        appId: "1:962702463807:web:487f8d597f8467c41eb98a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function verifierCode() {
+        const input = document.getElementById('pass-code');
+        const card = document.getElementById('card-box');
+        
+        if(input.value === "101010") {
+            document.getElementById('login-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                chargerDonnees();
+            }, 500);
+        } else {
+            card.classList.add('shake');
+            setTimeout(() => card.classList.remove('shake'), 400);
+            input.value = "";
+        }
+    }
+
+    function chargerDonnees() {
+        db.ref('3tv_config').on('value', (snap) => {
+            const data = snap.val() || {};
+            document.getElementById('directUrl').value = data.directUrl || "";
+            document.getElementById('slogan').value = data.slogan || "";
+            document.getElementById('whatsapp').value = data.whatsapp || "";
+            document.getElementById('tiktok').value = data.tiktok || "";
+            renderList('list-emissions', data.emissions, 'emissions');
+            renderList('list-pubs', data.pubs, 'pubs');
+        });
+    }
+
+    function updateField(field) {
+        const val = document.getElementById(field).value;
+        let update = {}; update[field] = val;
+        db.ref('3tv_config').update(update).then(() => alert("✅ Mise à jour réussie !"));
+    }
+
+    function addItem(path) {
+        const nom = (path === 'emissions') ? document.getElementById('em-nom').value : document.getElementById('pub-nom').value;
+        const val = (path === 'emissions') ? document.getElementById('em-url').value : document.getElementById('pub-img').value;
+        if(!nom || !val) return alert("Champs vides !");
+
+        db.ref('3tv_config/' + path).once('value', (snap) => {
+            let list = snap.val() || [];
+            list.push({ nom: nom, url: val, titre: nom, image: val });
+            db.ref('3tv_config/' + path).set(list).then(() => {
+                document.getElementById('em-nom').value = ""; document.getElementById('em-url').value = "";
+                document.getElementById('pub-nom').value = ""; document.getElementById('pub-img').value = "";
+            });
+        });
+    }
+
+    window.deleteItem = (path, index) => {
+        if(confirm("Confirmer la suppression ?")) {
+            db.ref('3tv_config/' + path).once('value', (snap) => {
+                let list = snap.val() || [];
+                list.splice(index, 1);
+                db.ref('3tv_config/' + path).set(list);
+            });
+        }
+    }
+
+    function renderList(id, list, path) {
+        const container = document.getElementById(id);
+        if(!list) { container.innerHTML = ""; return; }
+        container.innerHTML = list.map((item, i) => `
+            <div class="item">
+                <span>${item.nom || item.titre}</span>
+                <button class="btn-del" onclick="deleteItem('${path}', ${i})">Supprimer</button>
+            </div>
+        `).join('');
+    }
+</script>
+
+</body>
+</html>
